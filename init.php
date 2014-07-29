@@ -4,7 +4,7 @@ Plugin::factory('login_attempts', array(
 	'title' => 'Login attempts',
 ))->register();
 
-Observer::observe( 'admin_login_validation', function($post) {
+Observer::observe( array('admin_login_validation', 'login_validation'), function($post) {
 
 	if(Login_Attempts::get_total() >= Config::get('login_attempts', 'max_attempts_for_captcha'))
 	{
@@ -17,7 +17,7 @@ Observer::observe( 'admin_login_validation', function($post) {
 	}
 });
 
-Observer::observe( 'admin_login_before', function($post) {
+Observer::observe( array('login_before', 'admin_login_before'), function($post) {
 
 	$error = FALSE;
 	
@@ -45,12 +45,12 @@ Observer::observe( 'admin_login_before', function($post) {
 });
 
 
-Observer::observe( 'admin_login_success', function($username) {
+Observer::observe( array('login_success', 'admin_login_success'), function($username) {
 	Login_Attempts::clear();
 });
 
 
-Observer::observe( 'admin_login_failed', function($post) {
+Observer::observe( array('admin_login_failed', 'login_failed'), function($post) {
 	Login_Attempts::add();
 });
 
