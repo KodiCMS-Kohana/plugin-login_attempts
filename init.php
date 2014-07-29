@@ -57,7 +57,7 @@ Observer::observe( 'admin_login_failed', function($post) {
 Observer::observe( 'admin_login_form', function() {
 	$total_attempts = Login_Attempts::get_total();
 
-	if($total_attempts >= Config::get('login_attempts', 'max_attempts'))
+	if( ! Login_Attempts::denied() )
 	{
 		echo View::factory('login_attempts/denied', array(
 			'period' => Config::get('login_attempts', 'period')
