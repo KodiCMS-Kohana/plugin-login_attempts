@@ -1,12 +1,12 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
 
-Plugin::factory('login_attempts', array(
+$plugin = Plugin::factory('login_attempts', array(
 	'title' => 'Login attempts',
 ))->register();
 
-Observer::observe( array('admin_login_validation', 'login_validation'), function($post) {
+Observer::observe( array('admin_login_validation', 'login_validation'), function($post, $plugin) {
 
-	if(Login_Attempts::get_total() >= Config::get('login_attempts', 'max_attempts_for_captcha'))
+	if(Login_Attempts::get_total() >= $plugin->max_attempts_for_captcha)
 	{
 		$post
 			->label('captcha', __('Captcha'))
@@ -15,15 +15,15 @@ Observer::observe( array('admin_login_validation', 'login_validation'), function
 				array('Captcha::valid'),
 			));
 	}
-});
+}, $plugin);
 
-Observer::observe( array('login_before', 'admin_login_before'), function($post) {
+Observer::observe( array('login_before', 'admin_login_before'), function($post, $plugin) {
 
 	$error = FALSE;
 	
 	if( ! Login_Attempts::denied())
 	{
-		$period = Config::get('login_attempts', 'period');
+		$period = $plugin->period;
 
 		Messages::errors(__('Access denied for :period minutes.', array(
 			':period' => $period
@@ -42,7 +42,7 @@ Observer::observe( array('login_before', 'admin_login_before'), function($post) 
 	{
 		HTTP::redirect( (string) Route::get('user')->uri(array( 'action' => 'login' )), 302);
 	}
-});
+}, $plugin);
 
 
 Observer::observe( array('login_success', 'admin_login_success'), function($username) {
@@ -54,17 +54,17 @@ Observer::observe( array('admin_login_failed', 'login_failed'), function($post) 
 	Login_Attempts::add();
 });
 
-Observer::observe( 'admin_login_form', function() {
+Observer::observe( 'admin_login_form', function($plugin) {
 	$total_attempts = Login_Attempts::get_total();
 
 	if( ! Login_Attempts::denied() )
 	{
 		echo View::factory('login_attempts/denied', array(
-			'period' => Config::get('login_attempts', 'period')
+			'period' => $plugin->period
 		));
 	}
-	else if($total_attempts >= Config::get('login_attempts', 'max_attempts_for_captcha'))
+	else if($total_attempts >= $plugin->max_attempts_for_captcha)
 	{
 		echo View::factory('login_attempts/captcha');
 	}
-});
+}, $plugin);

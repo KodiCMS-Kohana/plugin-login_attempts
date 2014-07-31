@@ -1,6 +1,15 @@
 <?php defined( 'SYSPATH' ) or die( 'No direct script access.' );
 
-class Plugin_Login_Attempts extends Plugin_Type_Config {
+class Plugin_Login_Attempts extends Plugin_Decorator {
+	
+	public function default_settings()
+	{
+		return array(
+			'period' => Config::get('login_attempts', 'period'),
+			'max_attempts' => Config::get('login_attempts', 'max_attempts'),
+			'max_attempts_for_captcha' => Config::get('login_attempts', 'max_attempts_for_captcha'),
+		);
+	}
 	
 	public function rules()
 	{
@@ -33,10 +42,5 @@ class Plugin_Login_Attempts extends Plugin_Type_Config {
 				array('intval')
 			),
 		);
-	}
-	
-	protected function _config_group_key()
-	{
-		return $this->id();
 	}
 }
