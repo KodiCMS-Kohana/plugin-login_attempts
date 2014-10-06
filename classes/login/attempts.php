@@ -5,6 +5,16 @@
  */
 class Login_Attempts {
 	
+	/**
+	 * 
+	 * @param string $key
+	 * @return string
+	 */
+	public static function config($key)
+	{
+		return Plugins::get_registered('login_attempts')->get($key);
+	}
+
 	public static function get_total($ip = NULL)
 	{
 		if( ! Valid::ip($ip))
@@ -13,7 +23,7 @@ class Login_Attempts {
 		}
 		
 		return DB::select('attempts')
-			->from('login_attempts')
+			->from('user_login_attempts')
 			->where('ip', '=', $ip)
 			->limit(1)
 			->execute()
@@ -27,8 +37,8 @@ class Login_Attempts {
 			$ip = Request::$client_ip;
 		}
 		
-		$result = DB::select('attempts', array(DB::expr('(CASE when last_login is not NULL and DATE_ADD(last_login, INTERVAL :period MINUTE) > NOW() then 1 else 0 end)', array(':period' => Config::get('login_attempts', 'period'))), 'denied'))
-			->from('login_attempts')->where('ip', '=', $ip)
+		$result = DB::select('attempts', array(DB::expr('(CASE when last_login is not NULL and DATE_ADD(last_login, INTERVAL :period MINUTE) > NOW() then 1 else 0 end)', array(':period' => self::config('period'))), 'denied'))
+			->from('user_login_attempts')->where('ip', '=', $ip)
 			->limit(1)
 			->execute()
 			->current();
@@ -37,7 +47,7 @@ class Login_Attempts {
 		{
 			return TRUE;
 		}
-		else if($result['attempts'] >= Config::get('login_attempts', 'max_attempts'))
+		else if($result['attempts'] >= self::config('max_attempts'))
 		{
 			if($result['denied'] == 1)
 			{
@@ -70,7 +80,7 @@ class Login_Attempts {
 				'last_login' => date('Y-m-d H:i:s')
 			);
 			
-			DB::insert('login_attempts')
+			DB::insert('user_login_attempts')
 				->columns(array_keys($data))
 				->values($data)
 				->execute();
@@ -79,11 +89,11 @@ class Login_Attempts {
 		{
 			$attempts = $attempts + 1;
 			
-			$update = DB::update('login_attempts')
+			$update = DB::update('user_login_attempts')
 				->set(array('attempts' => $attempts))
 				->where('ip', '=', $ip);
 			
-			if($attempts == Config::get('login_attempts', 'max_attempts'))
+			if($attempts == self::config('max_attempts'))
 			{
 				$update->set(array('last_login' => date('Y-m-d H:i:s')));
 			}
@@ -99,7 +109,7 @@ class Login_Attempts {
 			$ip = Request::$client_ip;
 		}
 		
-		return (bool) DB::update('login_attempts')
+		return (bool) DB::update('user_login_attempts')
 			->set(array('attempts' => 0))
 			->where('ip', '=', $ip)
 			->execute();

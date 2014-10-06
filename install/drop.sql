@@ -1,0 +1,1 @@
+DROP TABLE `__TABLE_PREFIX__user_login_attempts`, `__TABLE_PREFIX__user_ips`;
