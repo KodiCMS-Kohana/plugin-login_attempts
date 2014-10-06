@@ -1,4 +1,4 @@
-<p class="text-error"><?php echo __('Access denied for :period minutes.', array(
+<p class="alert alert-dark alert-danger no-margin-b"><?php echo __('Access denied for :period minutes.', array(
 	':period' => $period
 )); ?></p>
 
