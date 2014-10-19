@@ -64,9 +64,9 @@ Observer::observe( array('login_success', 'admin_login_success'), function($user
 
 Observer::observe( 'template_before_render', function($username) {
 	
-	if( AuthUser::isLoggedIn() AND ! ORM::factory('user_ip')->allowed_ip())
+	if( Auth::is_logged_in() AND ! ORM::factory('user_ip')->allowed_ip())
 	{
-		AuthUser::logout();
+		Auth::logout();
 		HTTP::redirect( (string) Route::get('user')->uri(array( 'action' => 'login' )), 302);
 	}
 
